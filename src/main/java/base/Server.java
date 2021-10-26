@@ -11,6 +11,7 @@ import java.util.List;
 public class Server {
     private final LinkedList<Bot> bots;
     private final int port;
+    private HttpServer httpServer;
     
     public Server(Bot bot, int port) {
         this.bots = new LinkedList<>(List.of(bot));
@@ -23,12 +24,16 @@ public class Server {
     }
 
     public void run() throws IOException, NoSuchAlgorithmException {
-        HttpServer server = HttpServer.create(new InetSocketAddress(this.port), 0);
+        this.httpServer = HttpServer.create(new InetSocketAddress(this.port), 0);
         for (Bot bot : bots) {
-            server.createContext(bot.getPathUri(), new Handler(bot));
+            this.httpServer.createContext(bot.getPathUri(), new Handler(bot));
         }
         //Thread control is given to executor service.
-        server.setExecutor(java.util.concurrent.Executors.newCachedThreadPool());
-        server.start();
+        this.httpServer.setExecutor(java.util.concurrent.Executors.newCachedThreadPool());
+        this.httpServer.start();
+    }
+
+    public void shutdown() {
+        this.httpServer.stop(1);
     }
 }

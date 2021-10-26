@@ -289,9 +289,9 @@ public class RunBots {
 }
 ```
 
-You could add this file to `usage` package for learn our examples.
-If you really want to run this code on you machine you
-need to inject this dependency to the `Maven` via `pom.xml`
+You can add this file to the `usage` package to learn our examples.
+If you want to run this code on you machine you
+need to inject this dependency to `Maven` via `pom.xml`
 
 ```xml
 
@@ -303,7 +303,7 @@ need to inject this dependency to the `Maven` via `pom.xml`
     <systemPath>${project.basedir}/lib/tgbot-java-httpclient-1.0.jar</systemPath>
 </dependency>
 ```
-Also you must replace example tokens for your real tokens. 
+Also, you must replace example tokens for your real tokens. 
 After that run 2 commands:
 ```shell
 mvn install:install-file -Dfile=lib/tgbot-java-httpclient-1.0.jar -DgroupId=com.telegram.bot.client.lib -DartifactId=tgbot-java-httpclient -Dversion=1.0 -Dpackaging=jar

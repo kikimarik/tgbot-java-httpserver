@@ -5,18 +5,31 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 public class BotBootstrap {
-    private static final int DEFAULT_SERVER_PORT = 4909;
-    private base.Server server;
+    private Server server;
     private Map<Bot, HashMap<String, BotEventListener>> botPool;
+    private Thread handlerThread;
+    private Thread serverThread;
 
     public BotBootstrap(Server server, Map<Bot, HashMap<String, BotEventListener>> botPool) {
-        this.server = server;
-        this.botPool = botPool;
+        this.setServer(server);
+        this.setBotPool(botPool);
     }
 
     public BotBootstrap(Server server, Bot bot, HashMap<String, BotEventListener> listeners) {
+        this.setServer(server);
+        this.setBotPool(new HashMap<>());
+        this.addBotToPoll(bot, listeners);
+    }
+
+    public void setServer(Server server) {
         this.server = server;
-        this.botPool = new HashMap<>();
+    }
+
+    public void setBotPool(Map<Bot, HashMap<String, BotEventListener>> botPool) {
+        this.botPool = botPool;
+    }
+
+    public void addBotToPoll(Bot bot, HashMap<String, BotEventListener> listeners) {
         this.botPool.put(bot, listeners);
     }
 
@@ -24,7 +37,7 @@ public class BotBootstrap {
         if (!this.validate()) {
             throw new RuntimeException("It was the BotBootstrap configuration problem.");
         }
-        Thread serverThread = new Thread(() -> {
+        this.serverThread = new Thread(() -> {
             try {
                 Set<Map.Entry<Bot, HashMap<String, BotEventListener>>> bots = this.botPool.entrySet();
                 for (Map.Entry<Bot, HashMap<String, BotEventListener>> bot : bots) {
@@ -35,15 +48,21 @@ public class BotBootstrap {
                 e.printStackTrace();
             }
         });
-        Thread handlerThread = new Thread(() -> {
+        this.handlerThread = new Thread(() -> {
             while (true) {
                 for (Bot bot : this.botPool.keySet()) {
                     bot.handleEvents();
                 }
             }
         });
-        handlerThread.start();
-        serverThread.start();
+        this.handlerThread.start();
+        this.serverThread.start();
+    }
+
+    public void down() {
+        this.handlerThread.interrupt();
+        this.server.shutdown();
+        this.serverThread.interrupt();
     }
 
     private boolean validate() {
