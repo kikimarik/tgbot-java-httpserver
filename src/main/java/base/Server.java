@@ -7,15 +7,16 @@ import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 public class Server {
     private final LinkedList<Bot> bots;
     private final int port;
     private HttpServer httpServer;
+    private CountDownLatch cdl = new CountDownLatch(1);
     
     public Server(Bot bot, int port) {
-        this.bots = new LinkedList<>(List.of(bot));
-        this.port = port;
+        this(new LinkedList<>(List.of(bot)), port);
     }
 
     public Server(LinkedList<Bot> bots, int port) {
@@ -31,9 +32,17 @@ public class Server {
         //Thread control is given to executor service.
         this.httpServer.setExecutor(java.util.concurrent.Executors.newCachedThreadPool());
         this.httpServer.start();
+        System.out.println("UP");
+        this.cdl.countDown();
     }
 
     public void shutdown() {
-        this.httpServer.stop(1);
+        try {
+            this.cdl.await();
+            this.httpServer.stop(1);
+            System.out.println("DOWN");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

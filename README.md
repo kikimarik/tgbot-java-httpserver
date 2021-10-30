@@ -299,8 +299,6 @@ need to inject this dependency to `Maven` via `pom.xml`
     <groupId>com.telegram.bot.client.lib</groupId>
     <artifactId>tgbot-java-httpclient</artifactId>
     <version>1.0</version>
-    <scope>system</scope>
-    <systemPath>${project.basedir}/lib/tgbot-java-httpclient-1.0.jar</systemPath>
 </dependency>
 ```
 Also, you must replace example tokens for your real tokens. 
